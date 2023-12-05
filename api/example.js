@@ -1,7 +1,30 @@
-export default function handler(request, response) {
-  response.status(200).json({
-    body: request.body,
-    query: request.query,
-    cookies: request.cookies,
-  });
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(request) {
+  const urlParams = new URL(request.url).searchParams;
+  const query = Object.fromEntries(urlParams);
+  const cookies = request.headers.get('cookie');
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    body = null;
+  }
+
+  return new Response(
+    JSON.stringify({
+      body,
+      query,
+      cookies,
+    }),
+    {
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+    },
+  );
 }
